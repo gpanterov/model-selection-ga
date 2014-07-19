@@ -1,5 +1,6 @@
 import numpy as np
-
+dict_op ={'*':np.prod,
+			'+':np.sum}
 def fform(coef, data, operators):
 	"""
 	Calculates the value of the target variable
@@ -11,4 +12,9 @@ def fform(coef, data, operators):
 
 	returns y: Tx1 array of the target variable
 	"""
-
+	bX = data * coef
+	val = bX[:,0]
+	for i, op in enumerate(operators):
+		val = dict_op[op](val, bX[:, i+1])
+	return val
+		
