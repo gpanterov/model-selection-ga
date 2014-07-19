@@ -15,6 +15,12 @@ def fform(coef, data, operators):
 	bX = data * coef
 	val = bX[:,0]
 	for i, op in enumerate(operators):
-		val = dict_op[op](val, bX[:, i+1])
-	return val
+		if op == '*':
+			val *= bX[:, i+1]
+		if op == '+':
+			val += bX[:, i+1]
+		if op == '^':
+			val **=bX[:, i+1]
+
+	return val	
 		
