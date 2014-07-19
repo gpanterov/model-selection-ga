@@ -54,7 +54,7 @@ def normalize(nd_array, axis=0):
 #########################################
 # Initial Parameters for the simulation #
 #########################################
-np.random.seed(12345)
+#np.random.seed(12345)
 n = 2000
 k = 3
 params = [1, 1.5, 2.5]
@@ -120,18 +120,7 @@ y_ols = results.predict(exog=new_data)
 ols_mse = np.mean((new_y - y_ols)**2)
 print "Out of sample OLS mse is: ", ols_mse
 
-rel_vars_norm = normalize(rel_vars)
-y_norm = normalize(y)
-#new_data_norm = normalize(new_data)
-new_data_norm = (new_data - np.min(rel_vars, 0)) / (np.max(rel_vars, 0) -\
-				np.min(rel_vars, 0))
 
 
-model_norm = sm.OLS(y_norm, rel_vars_norm)
-results = model_norm.fit()
-y_norm_fit = results.predict(exog=new_data_norm)
 
-y_renorm_fit = np.min(y) + y_norm_fit * (np.max(y) - np.min(y))
 
-renorm_mse = np.mean((new_y - y_renorm_fit)**2)
-print "Re-normalize out of sample OLS mse is: ", renorm_mse

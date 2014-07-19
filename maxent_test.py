@@ -40,7 +40,7 @@ def obj_func(x0, psupport, esupport):
 
 def obj_func_me(x0, psupport):
 	P = x0.reshape((K, len(psupport)))
-	Hp = np.sum(np.sum(P0 * np.log(P0), axis=1))
+	Hp = np.sum(np.sum(P * np.log(P), axis=1))
 	return Hp
 
 
@@ -105,6 +105,25 @@ def lagrangian_me(x0, y, X, psupport, fform):
 	L = obj + np.sum(lambda_prob * cons_p) + \
 		np.sum(lambda_mom * np.array([cons_mom0, cons_mom1, cons_mom2]))
 	return -L
+
+def obj_penalty_me(x, y, X, psupport, fform):
+	#Entropy
+	P = x.reshape((K, len(psupport)))
+	Hp = -np.sum(np.sum(P * np.log(P), axis=1))
+	# Proper probability constraint
+	s = np.sum(P, axis=1)
+	pbool = (s < 1 + 1e-10) * (s > 1 - 1e-10)
+	penalty_prob = 1e5*(K - np.sum(pbool))
+	# Moment constraints
+	params = np.sum(P * psupport, axis=1)
+	e = y - fform(params, X)
+	e = e.reshape((T, 1))
+	moments = np.sum(X*e, axis=0)
+	penalty_moments = 1e5 * np.sum(moments ** 2)
+	#penalty_moments = K - np.sum((moments < 0 + 1e-10) * (moments >0 - 1e-10))
+	Obj = -Hp + penalty_prob + penalty_moments
+	return Obj
+
 #########################################
 # Initial Parameters for the simulation #
 #########################################
@@ -163,6 +182,8 @@ cons_me = ({'type': 'eq',
 sol = minimize(obj_func_me, x0me, args=(psupport,),
 				method='SLSQP', constraints=cons_me)
 
+sol_penalty = minimize(obj_penalty_me, x0me, args=(y, rel_vars, psupport, fform),
+				method='Nelder-Mead')
 #sol = minimize(lagrangian_me, x0lag, args=(y, rel_vars, psupport, fform),
 #				method='Powell')
 ###########
@@ -172,10 +193,18 @@ X = sol['x'].reshape((K, 3))
 #X = sol['x'].reshape((K + 2, 3))
 P = X[0:K, :]
 print sol['message']
+print "\n"
+
+X = sol_penalty['x'].reshape((K,3))
+P_penalty = X[0:K, :]
+print  sol_penalty['message']
+print "\n"
 
 params_estim = np.sum(P * psupport, axis=1)
+params_estim_penalty = np.sum(P_penalty * psupport, axis=1)
 print "The true value of the parameters is: ", params
 print "The ME parameter estimates are: ", params_estim
+print "The ME (penalty) parameter estimates are: ", params_estim_penalty
 #############
 # Benchmark #
 #############

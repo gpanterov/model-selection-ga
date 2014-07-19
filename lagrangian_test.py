@@ -15,13 +15,11 @@ cons = ({'type':'eq',
 solc = minimize(func, x0, method='SLSQP', constraints=cons)
 
 # Lagrangian
-def lagrangian(xl):
-	x = xl[1:]
-	l = xl[0]
-	return (1.3*x[0]**2 + x[1]**2-  l * (5 - x[0] - x[1]))
+def obj_penalty(x):
+	return (1.3*x[0]**2 + x[1]**2 + 1e10 * (5 - x[0] - x[1]) ** 2)
 
-xl0 = np.ones(3)
-soll = minimize(lagrangian, xl0, method='SLSQP')
+x0 = np.ones(2)
+soll = minimize(obj_penalty, x0, method='SLSQP')
 
 # Brute force
 rranges=(slice(-5, 5, 0.01), slice(-5, 5, 0.01))
