@@ -38,7 +38,7 @@ def obj_func(x0, psupport, esupport):
 	Hw = np.sum(np.sum(W0 * np.log(W0), axis=1))
 	return Hp + Hw
 
-def obj_func_me(x0, psupport, esupport):
+def obj_func_me(x0, psupport):
 	P = x0.reshape((K, len(psupport)))
 	Hp = np.sum(np.sum(P0 * np.log(P0), axis=1))
 	return Hp
@@ -63,7 +63,7 @@ def constraint_moments(x0, num_of_var, y, X, psupport, esupport):
 
 
 
-def constraint_moments_me(x0, num_of_var, y, X, psupport, esupport, fform):
+def constraint_moments_me(x0, num_of_var, y, X, psupport, fform):
 	P = x0.reshape((K, len(psupport)))	
 
 	params = np.sum(P * psupport, axis=1)
@@ -90,10 +90,25 @@ def normalize(nd_array, axis=0):
 	normalized_array = (nd_array - min_vals) / (max_vals - min_vals)
 	return normalized_array
 
+def lagrangian_me(x0, y, X, psupport, fform):
+	lambda_all = x0[-2 * K :]
+	lambda_prob = lambda_all[0:K]
+	lambda_mom = lambda_all[K:]
+	x = x0[0: -2*K]
+
+	P = x.reshape((K, len(psupport)))	
+	obj = -obj_func_me(x, psupport)
+	cons_p = 1 - np.sum(P, axis=1)
+	cons_mom0 = constraint_moments_me(x, 0, y, X, psupport, fform)
+	cons_mom1 = constraint_moments_me(x, 1, y, X, psupport, fform)
+	cons_mom2 = constraint_moments_me(x, 2, y, X, psupport, fform)
+	L = obj + np.sum(lambda_prob * cons_p) + \
+		np.sum(lambda_mom * np.array([cons_mom0, cons_mom1, cons_mom2]))
+	return -L
 #########################################
 # Initial Parameters for the simulation #
 #########################################
-np.random.seed(12345)
+#np.random.seed(12345)
 T = 1000
 K = 3
 params = [1, 1.5, 2.5]
@@ -118,7 +133,7 @@ W0 = np.ones(shape=(T, len(esupport))) / 3.
 
 x0 = np.row_stack((P0,W0)).flatten()
 x0me = P0.flatten()
-
+x0lag = np.row_stack((P0, [1.,1.,1.], [1.,1.,1.])).flatten()
 
 
 cons = ({'type': 'eq',
@@ -134,23 +149,27 @@ cons = ({'type': 'eq',
 
 cons_me = ({'type': 'eq',
 		 'fun': constraint_moments_me,
-		 'args': (0, y, rel_vars, psupport, esupport, fform)},
+		 'args': (0, y, rel_vars, psupport, fform)},
 		{'type': 'eq',
 		 'fun': constraint_moments_me,
-		 'args': (1, y, rel_vars, psupport, esupport, fform)},
+		 'args': (1, y, rel_vars, psupport, fform)},
 		{'type': 'eq',
 		 'fun': constraint_moments_me,
-		 'args': (2, y, rel_vars, psupport, esupport, fform)},
+		 'args': (2, y, rel_vars, psupport, fform)},
 		{'type': 'eq',
 		 'fun': constraint_prob_me}, )
 
 
-sol = minimize(obj_func_me, x0me, args=(psupport, esupport),
+sol = minimize(obj_func_me, x0me, args=(psupport,),
 				method='SLSQP', constraints=cons_me)
+
+#sol = minimize(lagrangian_me, x0lag, args=(y, rel_vars, psupport, fform),
+#				method='Powell')
 ###########
 # Results #
 ###########
 X = sol['x'].reshape((K, 3))
+#X = sol['x'].reshape((K + 2, 3))
 P = X[0:K, :]
 print sol['message']
 
