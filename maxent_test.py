@@ -61,22 +61,9 @@ def constraint_moments(x0, num_of_var, y, X, psupport, esupport):
 		 	 np.sum(W0 * esupport, axis=1) )
 	return np.sum(X[:, num_of_var] * e)
 
-def constraint_moments_me(x0, num_of_var, y, X, psupport, esupport):
-	P = x0.reshape((K, len(psupport)))	
-
-	pz = P * psupport
-
-	X0 = X[:,0].reshape((T,1))
-	X1 = X[:,1].reshape((T,1))
-	X2 = X[:,2].reshape((T,1))
-
-	e = y - (np.sum(np.kron(X0, pz[0,:]), axis=1) + \
-			 np.sum(np.kron(X1, pz[1,:]), axis=1) + \
-		 	 np.sum(np.kron(X2, pz[2,:]), axis=1) )
-	return np.sum(X[:, num_of_var] * e)
 
 
-def constraint_moments_me2(x0, num_of_var, y, X, psupport, esupport, fform):
+def constraint_moments_me(x0, num_of_var, y, X, psupport, esupport, fform):
 	P = x0.reshape((K, len(psupport)))	
 
 	params = np.sum(P * psupport, axis=1)
@@ -106,11 +93,11 @@ def normalize(nd_array, axis=0):
 #########################################
 # Initial Parameters for the simulation #
 #########################################
-#np.random.seed(12345)
-T = 200
+np.random.seed(12345)
+T = 1000
 K = 3
 params = [1, 1.5, 2.5]
-fform = linear_fform2
+fform = nl_fform
 
 ###############
 # Create Data #
@@ -132,17 +119,7 @@ W0 = np.ones(shape=(T, len(esupport))) / 3.
 x0 = np.row_stack((P0,W0)).flatten()
 x0me = P0.flatten()
 
-z = psupport
-pz = P0 * z
 
-X0 = rel_vars[:,0].reshape((T,1))
-X1 = rel_vars[:,1].reshape((T,1))
-X2 = rel_vars[:,2].reshape((T,1))
-
-e = y - (np.sum(np.kron(X0, pz[0,:]), axis=1) + \
-		 np.sum(np.kron(X1, pz[1,:]), axis=1) + \
-		 np.sum(np.kron(X2, pz[2,:]), axis=1) + \
-		 np.sum(W0 * esupport, axis=1) )
 
 cons = ({'type': 'eq',
 		 'fun': constraint_moments,
@@ -154,41 +131,22 @@ cons = ({'type': 'eq',
 		 'fun': constraint_moments,
 		 'args': (2, y, rel_vars, psupport, esupport)})
 
-cons = ({'type': 'eq',
-		 'fun': constraint_moments,
-		 'args': (0, y, rel_vars, psupport, esupport)},
-		{'type': 'eq',
-		 'fun': constraint_prob}, )
 
 cons_me = ({'type': 'eq',
 		 'fun': constraint_moments_me,
-		 'args': (0, y, rel_vars, psupport, esupport)},
-		{'type': 'eq',
-		 'fun': constraint_moments_me,
-		 'args': (1, y, rel_vars, psupport, esupport)},
-		{'type': 'eq',
-		 'fun': constraint_moments_me,
-		 'args': (2, y, rel_vars, psupport, esupport)},
-		{'type': 'eq',
-		 'fun': constraint_prob_me}, )
-
-cons_me2 = ({'type': 'eq',
-		 'fun': constraint_moments_me2,
 		 'args': (0, y, rel_vars, psupport, esupport, fform)},
 		{'type': 'eq',
-		 'fun': constraint_moments_me2,
+		 'fun': constraint_moments_me,
 		 'args': (1, y, rel_vars, psupport, esupport, fform)},
 		{'type': 'eq',
-		 'fun': constraint_moments_me2,
+		 'fun': constraint_moments_me,
 		 'args': (2, y, rel_vars, psupport, esupport, fform)},
 		{'type': 'eq',
 		 'fun': constraint_prob_me}, )
 
-#sol = minimize(obj_func, x0, args=(psupport, esupport), 
-#				method='SLSQP', constraints=cons)
 
 sol = minimize(obj_func_me, x0me, args=(psupport, esupport),
-				method='SLSQP', constraints=cons_me2)
+				method='SLSQP', constraints=cons_me)
 ###########
 # Results #
 ###########

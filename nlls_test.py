@@ -54,17 +54,13 @@ def normalize(nd_array, axis=0):
 #########################################
 # Initial Parameters for the simulation #
 #########################################
-#np.random.seed(12345)
-n = 100000
+np.random.seed(12345)
+n = 2000
 k = 3
 params = [1, 1.5, 2.5]
 
-noise_mean = 0
-noise_var = 10
-data_mean = 5
-data_var = 1
 
-fform = linear_fform2
+fform = nl_fform
 
 ###############
 # Create Data #
@@ -76,8 +72,8 @@ y = fform(params, rel_vars) + noise
 data = np.column_stack((y, rel_vars))
 df = pd.DataFrame(data)
 
-new_data = np.random.normal(data_mean, data_var, size=(n/3, k))
-new_noise = np.random.normal(10, 2, size=(n/3, ))
+new_data = np.random.normal(size=(n/3, k))
+new_noise = np.random.normal(size=(n/3, ))
 new_y = fform(params, new_data) + new_noise 
 
 
