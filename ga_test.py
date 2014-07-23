@@ -81,25 +81,6 @@ def mate_v2(chrom1, chrom2):
 			offspring2[i] = chrom2[i]
 	return tuple(offspring1), tuple(offspring2)
 
-# This version is slower
-def mate_v2b(chrom1, chrom2):
-	l = len(chrom1)
-
-	offspring1 = np.array([True] * l)
-	offspring2 = np.array([True] * l)
-	cross_prob1 = np.random.randint(0,2, size=(l, ))
-	cross_prob2 = np.random.randint(0,2, size=(l, ))
-	indx1_T = np.where(cross_prob1 == True)
-	indx1_F = np.where(cross_prob1 == False)
-	indx2_T = np.where(cross_prob2 == True)
-	indx2_F = np.where(cross_prob2 == False)
-	offspring1[indx1_T] = chrom1[indx1_T]
-	offspring1[indx1_F] = chrom2[indx1_F]
-	offspring2[indx2_T] = chrom1[indx2_T]
-	offspring2[indx2_F] = chrom2[indx2_F]
-
-	return tuple(offspring1), tuple(offspring2)
-
 start = time.time()
 # length of chromosome
 l = len(train_data.columns)
