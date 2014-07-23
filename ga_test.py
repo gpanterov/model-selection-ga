@@ -41,26 +41,33 @@ y = pd.Series(y)
 # GA #
 ######
 
-# Test loss function
-def loss_func(chrom):
-	return 1. * len(chrom) - np.sum(chrom)
-
-
 start = time.time()
+# Test loss function
+def fit_func(chrom):
+	return 1. * np.sum(chrom) / len(chrom)
+
+
+pop_size = 100
+num_gens = 500
+
 # length of chromosome
 l = len(train_data.columns)
-# Generate a random chromosome
-c1 = np.asarray(np.random.randint(0, 2, size=(l, )), dtype=bool)
-c2 = np.asarray(np.random.randint(0, 2, size=(l, )), dtype=bool)
+
+# Create population
 pop = []
-for i in range(100):
-	pop.append(np.asarray(np.random.randint(0, 2, size=(l, )), dtype=bool))
+for i in range(pop_size):
+	chrom = np.asarray(np.random.randint(0, 2, size=(l, )), dtype=bool)
+	pop.append(tuple(chrom))
+pop = tuple(pop)
 
-fit = []
-for gene in pop:
-	fit.append(loss_func(gene))
+# Estimate fit of population
 
-
+for i in range(num_gens):
+	fit = ga.get_fitness(pop, fit_func)
+	pop = ga.offspring_pop(pop, fit)
+	if max(fit)==1:	
+		print "Found maximum at ", i, "th iteration"
+		break
 print "It took: ", time.time() - start, " to finish"
 # Take variables according to the boolean chromosome
 #X = train_data.ix[:, c1]
