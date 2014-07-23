@@ -39,6 +39,9 @@ def mate_random_cross(chrom1, chrom2):
 			offspring2[i] = chrom2[i]
 	return tuple(offspring1), tuple(offspring2)
 
+# Sample from a list according to a probability weights
+# See http://stackoverflow.com/questions/4113307/pythonic-way-to-select-list-elements-with-different-probability
+
 def cdf(weights):
 	total=sum(weights) * 1.
 	result=[]
@@ -52,11 +55,29 @@ def choice(population, cdf_vals):
 	"""
 	Returns a random element of population sampled according
 	to the weights cdf_vals (produced by the func cdf)
+	Inputs
+	------
 	population: list, a list with objects to be sampled from
 	cdf_vals: list/array with cdfs (produced by the func cdf)
+	Returns
+	-------
+	An element from the list population
 	"""
 	assert len(population) == len(cdf_vals)
 	x = random.random()
 	idx = bisect(cdf_vals,x)
 	return population[idx]
+
+def offspring_pop(parent_pop, fitness, \
+					mating_func = mate_point_cross):
+	new_pop = []
+	cdf_vals = cdf(fitness)
+	while len(new_pop) < len(parent_pop):
+		chrom1 = choice(parent_pop, cdf_vals)
+		chrom2 = choice(parent_pop, cdf_vals)
+		off1, off2 = mating_func(chrom1, chrom2)
+		new_pop.append(off1)
+		new_pop.append(off2)
+	return tuple(new_pop)
+
 
