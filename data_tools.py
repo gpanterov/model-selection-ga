@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 dict_op ={'*':np.prod,
 			'+':np.sum}
 def fform(coef, data, operators):
@@ -23,4 +24,19 @@ def fform(coef, data, operators):
 			val **=bX[:, i+1]
 
 	return val	
-		
+
+def create_data(fname, N, K, K2, f, operators, coefs):	
+	train_data = np.random.normal(size=(N, K))
+
+	noise = np.random.normal( size=(N, ))
+	y = f(coefs, train_data, operators) + noise
+
+	# Crate other (non-relevant) data
+	other_data = np.random.normal( size=(N,K2))
+	all_data = np.column_stack((y, train_data, other_data))
+	pd.DataFrame(all_data).to_csv(fname, index=False, 
+									header=False)
+
+	train_data = pd.DataFrame(np.column_stack((train_data, other_data)))
+	y = pd.Series(y)
+	return y, train_data

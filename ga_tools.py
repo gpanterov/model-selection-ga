@@ -89,6 +89,13 @@ def offspring_pop(parent_pop, fitness, \
 					mating_func = mate_point_cross, mutate_prob=0.01):
 	new_pop = []
 	cdf_vals = cdf(fitness)
+	# Keep the top 10 % best solutions from the parents
+	indx = np.argsort(fitness)
+	cutoff = len(parent_pop) / 10
+	best_indx = indx[-cutoff:]
+	for i in best_indx:
+		new_pop.append(parent_pop[i])
+	
 	while len(new_pop) < len(parent_pop):
 		chrom1 = choice(parent_pop, cdf_vals)
 		chrom2 = choice(parent_pop, cdf_vals)
@@ -99,4 +106,15 @@ def offspring_pop(parent_pop, fitness, \
 		new_pop.append(off2)
 	return tuple(new_pop)
 
-
+def make_chrom_valid(chrom, start_max_length=15):
+	above_max = np.sum(chrom) - start_max_length
+	if above_max > 0:
+		c = np.array(chrom)
+		indx = np.where(c == True)[0]
+		np.random.shuffle(indx)
+		indx_4_ch = indx[0: above_max]
+		c[indx_4_ch] = False
+		return tuple(c)
+	else:
+		return chrom
+		
