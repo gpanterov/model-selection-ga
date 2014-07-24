@@ -74,9 +74,18 @@ def get_fitness(population, fit_func):
 		fit.append(fit_func(chrom))
 	return tuple(fit)
 
-	
-def mutate_chrom(chrom, mutate_prob=0.01):
-	new_chrom = []
+def mutate_chrom_bool(chrom, mutate_prob=0.1):
+	if random.random() < mutate_prob:
+		new_chrom = np.array(chrom)
+		l = len(chrom)
+		indx = random.randint(0, l-1)
+		new_chrom[indx] = not new_chrom[indx]
+		return tuple(new_chrom)
+	else:
+		return chrom
+
+def mutate_chrom_bool2(chrom, mutate_prob=0.01):
+	new_chrom = []	
 	for gene in chrom:
 		if random.random() > 1 - mutate_prob: 
 			# mutate
@@ -85,7 +94,7 @@ def mutate_chrom(chrom, mutate_prob=0.01):
 			new_chrom.append(gene)
 	return tuple(new_chrom)
 
-def offspring_pop(parent_pop, fitness, \
+def offspring_pop(parent_pop, fitness, mutate_func = mutate_chrom_bool,\
 					mating_func = mate_point_cross, mutate_prob=0.01):
 	new_pop = []
 	cdf_vals = cdf(fitness)
@@ -100,8 +109,8 @@ def offspring_pop(parent_pop, fitness, \
 		chrom1 = choice(parent_pop, cdf_vals)
 		chrom2 = choice(parent_pop, cdf_vals)
 		off1, off2 = mating_func(chrom1, chrom2)
-		off1 = mutate_chrom(off1, mutate_prob)
-		off2 = mutate_chrom(off2, mutate_prob)
+		off1 = mutate_func(off1, mutate_prob)
+		off2 = mutate_func(off2, mutate_prob)
 		new_pop.append(off1)
 		new_pop.append(off2)
 	return tuple(new_pop)
