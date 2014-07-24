@@ -84,18 +84,9 @@ def mutate_chrom_bool(chrom, mutate_prob=0.1):
 	else:
 		return chrom
 
-def mutate_chrom_bool2(chrom, mutate_prob=0.01):
-	new_chrom = []	
-	for gene in chrom:
-		if random.random() > 1 - mutate_prob: 
-			# mutate
-			new_chrom.append(not gene)
-		else:
-			new_chrom.append(gene)
-	return tuple(new_chrom)
 
 def offspring_pop(parent_pop, fitness, mutate_func = mutate_chrom_bool,\
-					mating_func = mate_point_cross, mutate_prob=0.01):
+					mating_func = mate_point_cross, mutate_prob=0.1):
 	new_pop = []
 	cdf_vals = cdf(fitness)
 	# Keep the top 10 % best solutions from the parents
