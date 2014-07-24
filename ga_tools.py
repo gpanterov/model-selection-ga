@@ -106,7 +106,7 @@ def offspring_pop(parent_pop, fitness, mutate_func = mutate_chrom_bool,\
 		new_pop.append(off2)
 	return tuple(new_pop)
 
-def make_chrom_valid(chrom, start_max_length=15):
+def make_chrom_valid(chrom, start_max_length=300):
 	above_max = np.sum(chrom) - start_max_length
 	if above_max > 0:
 		c = np.array(chrom)

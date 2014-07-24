@@ -10,14 +10,14 @@ reload(models)
 reload(ga)
 reload(Data)
 
-np.random.seed(12345)
+#np.random.seed(12345)
 
 
 ###############
 # Create Data #
 ###############
 K = 10
-K2 = 10 * K
+K2 = 500 * K
 N = 5000
 f = Data.fform
 
@@ -55,7 +55,7 @@ def model_fit(chrom, y, train_data):
 fit_func2 = lambda chrom: model_fit(chrom, y, train_data)
 
 
-pop_size = 500
+pop_size =500
 num_gens = 500
 
 # length of chromosome
@@ -78,11 +78,10 @@ print "The fitness of the best model is: ", fit_best_model, "\n"
 print "Calculated he best model and starting the loop"
 all_best_fit = []
 
-start_time2 = time.time()
 for i in range(num_gens):
 	fit = ga.get_fitness(pop, fit_func2)
 	pop = ga.offspring_pop(pop, fit, 
-			mating_func = ga.mate_random_cross, mutate_prob=0.01)
+			mating_func = ga.mate_random_cross, mutate_prob=0.1)
 
 	indx = np.argsort(fit)
 	best = pop[indx[-1]]
@@ -93,14 +92,11 @@ for i in range(num_gens):
 		print "Keep getting same results so we break"
 		break
 
-	if i % 10 == 0:
-		print "The best model is ", list(best_vars[0]), \
-			 " and its fitness is: ", fit[indx[-1]]
-		if fit_best_model <= fit[indx[-1]]:
-			print "PASSED FITNESS OF TRUE MODEL"
-		print "\n"
-		print "To complete 10 iterations it took: ", time.time() - start_time2
-		start_time2 = time.time()
+
+	print "Fitness is: ", fit[indx[-1]]
+	if fit_best_model <= fit[indx[-1]]:
+		print "PASSED FITNESS OF TRUE MODEL"
+	print "\n"
 
 print "\n"
 print "#" * 20
