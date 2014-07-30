@@ -3,7 +3,9 @@ import boto.manage.cmdshell
 
 
 def create_bucket(bucket_name):
-	s3 = boto.connect_s3()
+	s3 = boto.connect_s3(aws_access_key_id='AKIAICBVHKUYHQSPWUAA',
+						aws_secret_access_key='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')
+
 	bucket = s3.lookup(bucket_name)
 	if bucket:
 		print 'Bucket (%s) exists' % bucket_name
@@ -12,7 +14,9 @@ def create_bucket(bucket_name):
 	return bucket
 
 def store_private_data(bucket_name, key_name, path_to_file):
-	s3 = boto.connect_s3()
+	s3 = boto.connect_s3(aws_access_key_id='AKIAICBVHKUYHQSPWUAA',
+						aws_secret_access_key='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')
+
 	bucket = s3.lookup(bucket_name)
 	key = bucket.new_key(key_name)
 	key.set_contents_from_filename(path_to_file)
@@ -20,11 +24,31 @@ def store_private_data(bucket_name, key_name, path_to_file):
 	return key
 
 def download_file(bucket_name, key_name, path_to_file):
-	s3 = boto.connect_s3()
+	s3 = boto.connect_s3(aws_access_key_id='AKIAICBVHKUYHQSPWUAA',
+						aws_secret_access_key='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')
+
 	bucket = s3.lookup(bucket_name)
 	key = bucket.lookup(key_name)
 	key.get_contents_to_filename(path_to_file)
 	return key
+
+def file_to_string(bucket_name, key_name):
+	s3 = boto.connect_s3(aws_access_key_id='AKIAICBVHKUYHQSPWUAA',
+				aws_secret_access_key='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')
+	bucket = s3.lookup(bucket_name)
+	key = bucket.lookup(key_name)
+	contents = key.get_contents_as_string()
+	return contents
+
+def get_ec2_instance(path_to_key='/home/gpanterov/.ssh/'):
+	ec2 = boto.connect_ec2(aws_access_key_id='AKIAICBVHKUYHQSPWUAA',
+						aws_secret_access_key='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')
+	reservations = ec2.get_all_instances()
+	instance = reservations[-1].instances[0]
+	ec2_key_name = instance.key_name
+	cmd = boto.manage.cmdshell.sshclient_from_instance(instance, 
+		path_to_key + ec2_key_name + '.pem', user_name='ubuntu')
+	return cmd, instance
 
 def launch_instance(ami='ami-7341831a',
 					instance_type='t1.micro',
@@ -40,7 +64,9 @@ def launch_instance(ami='ami-7341831a',
 					login_user='ec2-user',
 					ssh_passwd=None):
 	cmd = None
-	ec2 = boto.connect_ec2()
+	ec2 = boto.connect_ec2(aws_access_key_id='AKIAICBVHKUYHQSPWUAA',
+						aws_secret_access_key='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')
+
 	try:
 		key=ec2.get_all_key_pairs(keynames=[key_name])[0]
 	except ec2.ResponseError, e:

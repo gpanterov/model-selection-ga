@@ -72,14 +72,26 @@ def get_fitness(population, fit_func):
 	fit = []
 	for chrom in population:
 		fit.append(fit_func(chrom))
+	assert np.sum(np.array(fit)<0) == 0
 	return tuple(fit)
 
-def mutate_chrom_bool(chrom, mutate_prob=0.1):
+def mutate_chrom_bool2(chrom, mutate_prob=0.1):
 	if random.random() < mutate_prob:
 		new_chrom = np.array(chrom)
 		l = len(chrom)
 		indx = random.randint(0, l-1)
 		new_chrom[indx] = not new_chrom[indx]
+		return tuple(new_chrom)
+	else:
+		return chrom
+
+def mutate_chrom_bool(chrom, mutate_prob=0.1):
+	if random.random() < mutate_prob:
+		new_chrom = np.array(chrom)
+		l = len(chrom)
+		p = np.random.uniform(size=(l,))
+		indx = np.where(p<0.02)[0]
+		new_chrom[indx] = np.invert(new_chrom[indx])
 		return tuple(new_chrom)
 	else:
 		return chrom
@@ -106,7 +118,7 @@ def offspring_pop(parent_pop, fitness, mutate_func = mutate_chrom_bool,\
 		new_pop.append(off2)
 	return tuple(new_pop)
 
-def make_chrom_valid(chrom, start_max_length=300):
+def make_chrom_valid(chrom, start_max_length=20):
 	above_max = np.sum(chrom) - start_max_length
 	if above_max > 0:
 		c = np.array(chrom)
