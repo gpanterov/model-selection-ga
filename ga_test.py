@@ -22,9 +22,9 @@ N = 1000
 f = Data.fform
 
 operators = '+' * (K - 1)
-coefs = np.random.normal(0, 2, size=(K, ))
+coefs = np.random.normal(10, 2, size=(K, ))
 print coefs
-y1, train_data1 = Data.create_data('sample_data_1k_1k.csv', N, K, K2, 
+y1, train_data1 = Data.create_data2('sample_data_1k_1k.csv', N, K, K2, 
 												f, operators, coefs)
 
 

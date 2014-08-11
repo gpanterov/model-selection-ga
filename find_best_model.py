@@ -7,7 +7,7 @@ import numpy as np
 import sys
 import boto
 import aws_tools as aws_tools
-
+import statsmodels.api as sm
 
 #inFile = sys.argv[1]
 output_key_name = sys.argv[2]
@@ -25,7 +25,7 @@ data_file_name = 's3_data_file.csv'
 key2 = aws_tools.download_file(bucket_name, data_file_name, data_file_name )
 print "Downloaded data from S3"
 
-data = pd.read_csv(data_file_name, header=None)
+data = pd.read_csv(data_file_name, header=None, skiprows=1)
 y = data.ix[:, 0]
 train_data = data.ix[:, 1:]
 N, Kall = np.shape(train_data)
@@ -87,11 +87,21 @@ for i in range(num_gens):
 ##########
 results_file_name = output_key_name
 f = open(results_file_name, 'w')
-model_vars = [str(i) for i in best_vars]
-model_vars = '-'.join(model_vars)
-print model_vars
-f.write(model_vars)
+#model_vars = [str(i) for i in best_vars]
+#model_vars = '-'.join(model_vars)
+#print model_vars
+#f.write(model_vars)
+X = train_data.ix[:, list(best)]
+model = sm.OLS(y, X)
+res = model.fit()
+reg_output = res.summary()
+f.write(str(reg_output))
+
+
+
+
 f.close()
+
 
 #output_bucket_name = 'georgipanterov.data.patterns.results'
 aws_tools.create_bucket(output_bucket_name)
