@@ -38,7 +38,6 @@ def gof_ols(y, X):
 	# Model training data
 	X0 = X.ix[0: cutoff, :]
 	y0 = y.ix[0: cutoff]
-
 	# Model evaluation data
 	X1 = X.ix[cutoff:, :]
 	y1 = y.ix[cutoff:]

@@ -129,4 +129,23 @@ def make_chrom_valid(chrom, start_max_length=20):
 		return tuple(c)
 	else:
 		return chrom
+
+def write_pop_to_file(pop, pop_file):
+	f = open(pop_file , 'w')
+	for chrom in pop:
+		chrom_int = np.asarray(chrom, dtype=int)
+		chrom_str = [str(gene) for gene in chrom_int]
+		f.writelines(chrom_str)
+		f.write('\n')
+	f.close()
+	
+def read_pop_from_file(pop_file):
+	f = open(pop_file, 'r')
+	pop = []
+	for line in f:
+		chrom = [int(gene) for gene in line.strip()]
+		chrom = np.asarray(chrom, dtype=bool)
+		pop.append(tuple(chrom))
+	return tuple(pop)
+	
 		

@@ -13,6 +13,33 @@ def create_bucket(bucket_name):
 		bucket = s3.create_bucket(bucket_name)
 	return bucket
 
+def delete_bucket(bucket_name):
+	s3 = boto.connect_s3(aws_access_key_id='AKIAICBVHKUYHQSPWUAA',
+					aws_secret_access_key='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')
+
+	bucket = s3.lookup(bucket_name)
+	if bucket:
+		all_keys = bucket.get_all_keys()
+		for key in all_keys:
+			key.delete()
+		bucket.delete()
+	else:
+		print "Bucket doesn't exist - nothing to delete"
+
+def check_bucket(bucket_name, num_of_keys):
+	s3 = boto.connect_s3(aws_access_key_id='AKIAICBVHKUYHQSPWUAA',
+				aws_secret_access_key='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')
+
+	bucket = s3.lookup(bucket_name)
+	if bucket:
+		all_keys = bucket.get_all_keys()
+		if len(all_keys) == num_of_keys:
+			return True
+		else:
+			return False
+	else:
+		return False
+
 def store_private_data(bucket_name, key_name, path_to_file):
 	s3 = boto.connect_s3(aws_access_key_id='AKIAICBVHKUYHQSPWUAA',
 						aws_secret_access_key='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')
@@ -44,8 +71,13 @@ def get_ec2_instance(path_to_key='/home/gpanterov/.ssh/'):
 	ec2 = boto.connect_ec2(aws_access_key_id='AKIAICBVHKUYHQSPWUAA',
 						aws_secret_access_key='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')
 	reservations = ec2.get_all_instances()
-	instance = reservations[-1].instances[0]
+	for i in reservations:
+		instance = i.instances[0]
+		if instance.public_dns_name == 'ec2-54-88-216-232.compute-1.amazonaws.com':
+			break
+	
 	ec2_key_name = instance.key_name
+	print ec2_key_name
 	cmd = boto.manage.cmdshell.sshclient_from_instance(instance, 
 		path_to_key + ec2_key_name + '.pem', user_name='ubuntu')
 	return cmd, instance

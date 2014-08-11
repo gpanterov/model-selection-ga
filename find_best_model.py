@@ -10,6 +10,9 @@ import aws_tools as aws_tools
 
 
 #inFile = sys.argv[1]
+output_key_name = sys.argv[2]
+output_bucket_name = sys.argv[1]
+
 
 bucket_name = 'georgipanterov.data.patterns'
 key_name = 'data_file.csv'
@@ -19,7 +22,7 @@ key_name = 'data_file.csv'
 #print "Uploaded data to S3"
 
 data_file_name = 's3_data_file.csv'
-key2 = aws_tools.download_file(bucket_name, key_name, data_file_name )
+key2 = aws_tools.download_file(bucket_name, data_file_name, data_file_name )
 print "Downloaded data from S3"
 
 data = pd.read_csv(data_file_name, header=None)
@@ -45,7 +48,7 @@ def model_fit(chrom, y, train_data):
 
 fit_func2 = lambda chrom: model_fit(chrom, y, train_data)
 
-pop_size =300
+pop_size =150
 num_gens = 100
 
 # length of chromosome
@@ -82,7 +85,7 @@ for i in range(num_gens):
 ##########
 # Output #
 ##########
-results_file_name = 'results.txt'
+results_file_name = output_key_name
 f = open(results_file_name, 'w')
 model_vars = [str(i) for i in best_vars]
 model_vars = '-'.join(model_vars)
@@ -90,10 +93,19 @@ print model_vars
 f.write(model_vars)
 f.close()
 
-bucket_name = 'georgipanterov.data.patterns.results'
-key_name = 'model_results.txt'
-aws_tools.create_bucket(bucket_name)
+#output_bucket_name = 'georgipanterov.data.patterns.results'
+aws_tools.create_bucket(output_bucket_name)
 print "done with output bucket"
-key = aws_tools.store_private_data(bucket_name, key_name, 
+key = aws_tools.store_private_data(output_bucket_name, output_key_name, 
 	results_file_name)
+
+
+pop_file_name = 'pop_' + output_key_name
+ga.write_pop_to_file(pop, pop_file_name)
+pop_bucket = output_bucket_name + '.pop'
+
+aws_tools.create_bucket(pop_bucket)
+key = aws_tools.store_private_data(pop_bucket, pop_file_name, 
+	pop_file_name)
+
 
