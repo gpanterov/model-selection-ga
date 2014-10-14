@@ -94,8 +94,25 @@ f = open(results_file_name, 'w')
 X = train_data.ix[:, list(best)]
 model = sm.OLS(y, X)
 res = model.fit()
+
+params = res.params
+pvalues = res.pvalues
+
+
+best_model ="The Equation For the Best Model is: \n" + "Y = "
+for j, i in enumerate(params.index):
+	if pvalues[i] < 0.05:
+		if params[i] > 0:
+			sign = "  +  "
+		else:
+			sign = "  -  "
+		if (j == 0) and (sign.strip()=="+"):
+			sign = ""
+		best_model += sign + str(abs(np.round(params[i], 3))) + " * VAR_" + str(i)
 reg_output = res.summary()
-f.write(str(reg_output))
+
+model_output = best_model + '\n' + '\n' +'\n' + str(reg_output)
+f.write(model_output)
 
 
 
